@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Beats">
+<meta name="theme-color" content="#0b1020">
+<title>Binaural Beats</title>
+<style>
+:root{--bg:#0b1020;--card:#141a2e;--card2:#1b2240;--text:#e8ecff;--muted:#8d96b8;--accent:#7c8cff;--line:#262e50}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:radial-gradient(900px 520px at 50% -160px,#1f2b5e 0%,var(--bg) 65%) no-repeat;color:var(--text);min-height:100vh;padding:env(safe-area-inset-top) 0 calc(40px + env(safe-area-inset-bottom))}
+.wrap{max-width:560px;margin:0 auto;padding:16px}
+header{text-align:center;padding:10px 0 0}
+h1{font-size:22px;font-weight:700;letter-spacing:.3px}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.stage{display:flex;flex-direction:column;align-items:center;padding:20px 0 6px}
+.orb{width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#ffffff40 0%,var(--accent) 38%,#00000000 72%);box-shadow:0 0 70px -10px var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:scale(.92);transition:box-shadow .6s}
+.orb.live{animation:breathe 9s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(.9)}50%{transform:scale(1.02)}}
+.orb .hz{font-size:36px;font-weight:700;text-shadow:0 2px 12px #0008}
+.orb .band{font-size:13px;opacity:.95;text-shadow:0 1px 6px #0008}
+.now{margin-top:16px;font-size:19px;font-weight:600}
+.nowdesc{color:var(--muted);font-size:13px;text-align:center;margin-top:4px;max-width:420px;line-height:1.4}
+.play{margin-top:16px;width:76px;height:76px;border-radius:50%;border:none;background:var(--accent);color:#0b1020;font-size:30px;cursor:pointer;box-shadow:0 8px 26px #0007;display:flex;align-items:center;justify-content:center}
+.play:active{transform:scale(.96)}
+.timeinfo{color:var(--muted);font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:14px}
+h2{font-size:15px;margin-bottom:10px}
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:none;background:none;color:var(--muted);padding:10px 6px;border-radius:9px;font-size:14px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#0b1020;font-weight:600}
+.hint{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.45}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card2);color:var(--text);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#0b1020;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.preset{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left;color:var(--text);cursor:pointer;font:inherit}
+.preset.on{border-color:var(--pc);box-shadow:0 0 0 1px var(--pc) inset}
+.preset .t{font-size:14px;font-weight:600}
+.preset .m{font-size:12px;color:var(--muted);margin-top:3px}
+.preset .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pc);margin-right:6px;vertical-align:1px}
+.row{display:flex;align-items:center;gap:10px;margin:12px 0}
+.row label{width:128px;font-size:14px;flex:0 0 auto}
+.row input[type=range]{flex:1;accent-color:var(--accent);min-width:0}
+.row .v{width:64px;text-align:right;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.toggle{display:flex;align-items:center;justify-content:space-between;font-size:14px;margin-top:6px}
+.toggle input{width:20px;height:20px;accent-color:var(--accent)}
+.bands{width:100%;border-collapse:collapse;font-size:13px}
+.bands td{padding:7px 4px;border-top:1px solid var(--line);vertical-align:top}
+.bands td:first-child{font-weight:600;white-space:nowrap}
+.bands td:nth-child(2){color:var(--muted);white-space:nowrap}
+.small{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Binaural Beats</h1>
+    <div class="sub">Frequenzen + Regen &amp; Meer für Schlaf, Ruhe, Fokus und Energie</div>
+  </header>
+
+  <div class="stage">
+    <div class="orb" id="orb"><div class="hz" id="hz">–</div><div class="band" id="band"></div></div>
+    <div class="now" id="nowName"></div>
+    <div class="nowdesc" id="nowDesc"></div>
+    <button class="play" id="playBtn" aria-label="Start">▶</button>
+    <div class="timeinfo" id="timeInfo"></div>
+  </div>
+
+  <section>
+    <h2>Wiedergabe</h2>
+    <div class="seg" id="modeSeg">
+      <button data-mode="binaural">🎧 Kopfhörer</button>
+      <button data-mode="iso">🔊 Lautsprecher</button>
+    </div>
+    <div class="hint" id="modeHint"></div>
+  </section>
+
+  <section>
+    <h2>Programme</h2>
+    <div class="chips" id="cats"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section>
+    <h2>Klangteppich</h2>
+    <div id="layers"></div>
+    <div class="hint">Mehrere Klänge lassen sich mischen. Die Frequenz läuft leise darunter.</div>
+  </section>
+
+  <section>
+    <h2>Frequenz</h2>
+    <div class="row"><label>Beat-Lautstärke</label><input type="range" id="beat" min="0" max="100" step="1"><span class="v" id="beatV"></span></div>
+    <div class="row"><label>Start-Frequenz</label><input type="range" id="fStart" min="0.5" max="45" step="0.1"><span class="v" id="fStartV"></span></div>
+    <div class="row"><label>Ziel-Frequenz</label><input type="range" id="fEnd" min="0.5" max="45" step="0.1"><span class="v" id="fEndV"></span></div>
+    <div class="row"><label>Übergang</label><input type="range" id="ramp" min="0" max="30" step="1"><span class="v" id="rampV"></span></div>
+    <div class="row"><label>Trägerton</label><input type="range" id="carrier" min="80" max="400" step="1"><span class="v" id="carrierV"></span></div>
+    <div class="hint">Bei Übergang „aus“ bleibt die Start-Frequenz konstant. Mit Übergang gleitet sie in der eingestellten Zeit zur Ziel-Frequenz.</div>
+  </section>
+
+  <section>
+    <h2>Timer &amp; Lautstärke</h2>
+    <div class="chips" id="timers"></div>
+    <div class="row"><label>Gesamt</label><input type="range" id="volume" min="0" max="100" step="1"><span class="v" id="volumeV"></span></div>
+    <div class="toggle"><span>Bildschirm anlassen</span><input type="checkbox" id="wake"></div>
+    <div class="hint">Am Ende des Timers wird 60 Sekunden lang sanft ausgeblendet.</div>
+  </section>
+
+  <section>
+    <h2>Frequenzbereiche</h2>
+    <table class="bands">
+      <tr><td>Delta</td><td>0,5–4 Hz</td><td>Tiefschlaf, Regeneration</td></tr>
+      <tr><td>Theta</td><td>4–8 Hz</td><td>Einschlafen, Meditation, tiefe Ruhe</td></tr>
+      <tr><td>Alpha</td><td>8–12 Hz</td><td>Entspannt-wach, Stressabbau, Kreativität</td></tr>
+      <tr><td>SMR / Low-Beta</td><td>12–15 Hz</td><td>Ruhiger Fokus, Lesen, Lernen</td></tr>
+      <tr><td>Beta</td><td>15–30 Hz</td><td>Wachheit, Antrieb, Motivation</td></tr>
+      <tr><td>Gamma</td><td>30–45 Hz</td><td>Hohe Konzentration</td></tr>
+    </table>
+    <div class="small">Die Wirkung binauraler Beats ist wissenschaftlich nur teilweise belegt. Gut belegt ist, dass gleichmäßige Hintergrundgeräusche beim Einschlafen und Abschirmen helfen. Leise hören und nicht beim Autofahren nutzen.<br>iPhone: Falls der Ton beim Sperren stoppt, „Bildschirm anlassen“ aktivieren.</div>
+  </section>
+</div>
+
+<script>
+const CATS=[{id:'alle',n:'Alle'},{id:'schlaf',n:'😴 Schlaf'},{id:'ruhe',n:'🧘 Entspannung'},{id:'fokus',n:'🎯 Fokus'},{id:'energie',n:'⚡ Energie'},{id:'kreativ',n:'🎨 Kreativ'}];
+const COLORS={schlaf:'#7c8cff',ruhe:'#4fd1b0',fokus:'#ffb547',energie:'#ff6b6b',kreativ:'#c38bff'};
+const LAYERS=[{id:'rain',n:'🌧️ Regen',max:1.0},{id:'ocean',n:'🌊 Meer',max:1.3},{id:'brown',n:'🟤 Braunes Rauschen',max:0.8},{id:'pink',n:'🌸 Rosa Rauschen',max:0.45}];
+const L=(rain=0,ocean=0,brown=0,pink=0)=>({rain,ocean,brown,pink});
+const PRESETS=[
+ {id:'einschlafen',cat:'schlaf',name:'Einschlafen',desc:'Gleitet von Theta langsam in Delta, dazu sanfter Regen.',carrier:120,start:7,end:3,ramp:20,layers:L(60),beat:28,timer:45},
+ {id:'tiefschlaf',cat:'schlaf',name:'Tiefschlaf',desc:'Ruhiges Delta mit Meeresrauschen für die ganze Nacht.',carrier:100,start:3,end:1.5,ramp:15,layers:L(0,65),beat:24,timer:90},
+ {id:'regenschlaf',cat:'schlaf',name:'Regen + Meer',desc:'Regen und Brandung gemischt, darunter Delta.',carrier:110,start:4,end:2,ramp:15,layers:L(45,45),beat:22,timer:60},
+ {id:'powernap',cat:'schlaf',name:'Power Nap',desc:'20 Minuten abschalten: Alpha gleitet nach Theta.',carrier:150,start:10,end:5,ramp:5,layers:L(0,0,35),beat:28,timer:20},
+ {id:'entspannung',cat:'ruhe',name:'Entspannung',desc:'Klassisches Alpha zum Runterkommen.',carrier:200,start:10,end:10,ramp:0,layers:L(40),beat:28,timer:30},
+ {id:'stress',cat:'ruhe',name:'Stressabbau',desc:'Von 12 auf 8 Hz – den Kopf langsam leeren.',carrier:180,start:12,end:8,ramp:10,layers:L(0,50),beat:28,timer:30},
+ {id:'meditation',cat:'ruhe',name:'Meditation',desc:'Tiefes Theta für Meditation und Atemübungen.',carrier:160,start:6,end:6,ramp:0,layers:L(0,0,0,20),beat:34,timer:20},
+ {id:'deepfocus',cat:'fokus',name:'Deep Focus · Lernen',desc:'Low-Beta 14 Hz mit braunem Rauschen gegen Ablenkung. 50 Minuten, dann Pause.',carrier:220,start:14,end:14,ramp:0,layers:L(0,0,50),beat:30,timer:50},
+ {id:'gamma',cat:'fokus',name:'Gamma 40 Hz',desc:'Für kurze, sehr intensive Konzentrationsphasen (25 Min).',carrier:250,start:40,end:40,ramp:0,layers:L(0,0,0,25),beat:24,timer:25},
+ {id:'lesen',cat:'fokus',name:'Lesen & Verstehen',desc:'SMR 12 Hz: ruhig-wach, gut für lange Texte.',carrier:200,start:12,end:12,ramp:0,layers:L(25,0,20),beat:28,timer:45},
+ {id:'motivation',cat:'energie',name:'Motivation',desc:'Beta 18 Hz für Antrieb und Wachheit.',carrier:240,start:18,end:18,ramp:0,layers:L(),beat:32,timer:30},
+ {id:'morgen',cat:'energie',name:'Morgen-Boost',desc:'Wacht mit dir auf: 8 → 18 Hz in 10 Minuten.',carrier:220,start:8,end:18,ramp:10,layers:L(0,20),beat:32,timer:15},
+ {id:'workout',cat:'energie',name:'Workout',desc:'Hohes Beta 22 Hz fürs Training.',carrier:260,start:22,end:22,ramp:0,layers:L(),beat:36,timer:60},
+ {id:'kreativ',cat:'kreativ',name:'Kreativ-Flow',desc:'Alpha/Theta-Grenze (7,83 Hz) für Ideen und Brainstorming.',carrier:200,start:7.83,end:7.83,ramp:0,layers:L(30),beat:30,timer:30},
+ {id:'tagtraum',cat:'kreativ',name:'Tagtraum',desc:'Theta 5,5 Hz mit Meer – Gedanken schweifen lassen.',carrier:170,start:5.5,end:5.5,ramp:0,layers:L(0,40),beat:30,timer:30}
+];
+const TIMERS=[0,15,20,25,30,45,50,60,90];
+
+let state={presetId:'einschlafen',mode:'binaural',cat:'alle',volume:70,wake:false};
+let ctx=null,G={},startT=0,timerEnd=null,tickId=null,wakeLock=null,playing=false;
+
+function load(){try{const s=JSON.parse(localStorage.getItem('bb_state')||'null');if(s)state=Object.assign(state,s);}catch(e){}
+ if(state.carrier===undefined)applyPresetValues(PRESETS.find(p=>p.id===state.presetId)||PRESETS[0]);}
+function save(){try{localStorage.setItem('bb_state',JSON.stringify(state));}catch(e){}}
+function applyPresetValues(p){state.presetId=p.id;state.carrier=p.carrier;state.fStart=p.start;state.fEnd=p.end;state.ramp=p.ramp;state.beat=p.beat;state.layers={...p.layers};state.timer=p.timer;}
+const preset=()=>PRESETS.find(p=>p.id===state.presetId)||PRESETS[0];
+const $=id=>document.getElementById(id);
+const fmtHz=v=>(Math.round(v*100)/100).toString().replace('.',',')+' Hz';
+function bandOf(h){return h<4?'Delta':h<8?'Theta':h<12?'Alpha':h<15?'SMR / Low-Beta':h<30?'Beta':'Gamma';}
+const beatCurve=v=>Math.pow(v/100,1.5)*0.35;
+const volCurve=v=>Math.pow(v/100,2);
+const layerCurve=(id,v)=>Math.pow(v/100,2)*LAYERS.find(l=>l.id===id).max;
+
+/* ---------- UI ---------- */
+function renderCats(){$('cats').innerHTML=CATS.map(c=>`<button class="chip${state.cat===c.id?' on':''}" data-cat="${c.id}">${c.n}</button>`).join('');}
+function renderGrid(){
+ const list=PRESETS.filter(p=>state.cat==='alle'||p.cat===state.cat);
+ $('grid').innerHTML=list.map(p=>{const f=p.start===p.end?fmtHz(p.start):fmtHz(p.start)+' → '+fmtHz(p.end);
+  return `<button class="preset${p.id===state.presetId?' on':''}" style="--pc:${COLORS[p.cat]}" data-id="${p.id}"><div class="t"><span class="dot"></span>${p.name}</div><div class="m">${f} · ${bandOf(p.end)}</div></button>`;}).join('');}
+function renderLayers(){$('layers').innerHTML=LAYERS.map(l=>`<div class="row"><label>${l.n}</label><input type="range" min="0" max="100" step="1" data-layer="${l.id}" value="${state.layers[l.id]||0}"><span class="v" id="lv_${l.id}">${state.layers[l.id]||0}%</span></div>`).join('');}
+function renderTimers(){$('timers').innerHTML=TIMERS.map(t=>`<button class="chip${state.timer===t?' on':''}" data-t="${t}">${t?t+' Min':'Aus'}</button>`).join('');}
+function renderMode(){document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===state.mode));
+ $('modeHint').textContent=state.mode==='binaural'?'Binaurale Beats: Jedes Ohr bekommt einen eigenen Ton, der Beat entsteht im Kopf. Funktioniert nur mit Kopfhörern.':'Isochrone Töne: Der Ton pulsiert im eingestellten Takt. Funktioniert auch über Lautsprecher, z. B. beim Schlafen ohne Kopfhörer.';}
+function renderSliders(){
+ $('beat').value=state.beat;$('beatV').textContent=state.beat+'%';
+ $('fStart').value=state.fStart;$('fStartV').textContent=fmtHz(state.fStart);
+ $('fEnd').value=state.fEnd;$('fEndV').textContent=fmtHz(state.fEnd);
+ $('ramp').value=state.ramp;$('rampV').textContent=state.ramp?state.ramp+' Min':'aus';
+ $('carrier').value=state.carrier;$('carrierV').textContent=state.carrier+' Hz';
+ $('volume').value=state.volume;$('volumeV').textContent=state.volume+'%';
+ $('wake').checked=state.wake;}
+function renderHead(){const p=preset();document.documentElement.style.setProperty('--accent',COLORS[p.cat]);
+ $('nowName').textContent=p.name;$('nowDesc').textContent=p.desc;updateOrb(state.fStart);}
+function updateOrb(h){$('hz').textContent=fmtHz(h);$('band').textContent=bandOf(h);}
+function renderAll(){renderCats();renderGrid();renderLayers();renderTimers();renderMode();renderSliders();renderHead();}
+
+/* ---------- Noise generators ---------- */
+function genWhite(n){const a=new Float32Array(n);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;return a;}
+function genPink(n){const a=new Float32Array(n);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+ for(let i=0;i<n;i++){const w=Math.random()*2-1;b0=0.99886*b0+w*0.0555179;b1=0.99332*b1+w*0.0750759;b2=0.969*b2+w*0.153852;b3=0.8665*b3+w*0.3104856;b4=0.55*b4+w*0.5329522;b5=-0.7616*b5-w*0.016898;a[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11;b6=w*0.115926;}return a;}
+function genBrown(n){const a=new Float32Array(n);let l=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;l=(l+0.02*w)/1.02;a[i]=l*3.5;}return a;}
+function genRain(n,sr){
+ const p=genPink(n),a=new Float32Array(n);
+ const k=Math.exp(-2*Math.PI*450/sr);let lp=0,env=0.6,target=0.6;const ec=1/(sr*1.8);
+ for(let i=0;i<n;i++){if(i%Math.floor(sr*1.5)===0)target=0.45+Math.random()*0.55;env+=(target-env)*ec;lp=lp*k+(1-k)*p[i];a[i]=(p[i]-lp)*0.9*env;}
+ const drops=Math.floor(n/sr*38);
+ for(let d=0;d<drops;d++){const pos=Math.floor(Math.random()*n),len=Math.floor(sr*(0.002+Math.random()*0.012)),amp=0.08+Math.pow(Math.random(),3)*0.7;
+  const plip=Math.random()<0.25,fq=1800+Math.random()*3500;
+  for(let j=0;j<len*4&&pos+j<n;j++){const e=Math.exp(-j/len);let s=(Math.random()*2-1)*e;if(plip)s=s*0.4+Math.sin(2*Math.PI*fq*j/sr)*e*0.6;a[pos+j]+=s*amp;}}
+ return a;}
+function makeLoop(secs,ch,gen){
+ const sr=ctx.sampleRate,N=Math.floor(secs*sr),F=Math.floor(sr*1.2),buf=ctx.createBuffer(ch,N,sr);
+ for(let c=0;c<ch;c++){const raw=gen(N+F,sr),d=buf.getChannelData(c);let pk=0;
+  for(let i=0;i<N;i++){let v;if(i<F){const w=i/F*Math.PI/2;v=raw[i]*Math.sin(w)+raw[N+i]*Math.cos(w);}else v=raw[i];d[i]=v;const av=Math.abs(v);if(av>pk)pk=av;}
+  const s=0.85/(pk||1);for(let i=0;i<N;i++)d[i]*=s;}
+ return buf;}
+
+/* ---------- Audio graph ---------- */
+function squareish(){const real=new Float32Array([0,0,0,0,0,0]),imag=new Float32Array([0,1,0,1/3,0,1/5]);return ctx.createPeriodicWave(real,imag);}
+function buildBeat(){
+ if(G.beatNodes){G.beatNodes.forEach(n=>{try{n.stop&&n.stop();}catch(e){}try{n.disconnect();}catch(e){}});}
+ G.oscL=G.oscR=G.car=G.lfo=null;
+ if(state.mode==='binaural'){
+  const l=ctx.createOscillator(),r=ctx.createOscillator(),m=ctx.createChannelMerger(2);
+  l.type=r.type='sine';l.connect(m,0,0);r.connect(m,0,1);m.connect(G.beatGain);l.start();r.start();
+  G.oscL=l;G.oscR=r;G.beatNodes=[l,r,m];
+ }else{
+  const c=ctx.createOscillator(),ig=ctx.createGain(),lfo=ctx.createOscillator(),d=ctx.createGain();
+  c.type='sine';ig.gain.value=0.5;lfo.setPeriodicWave(squareish());d.gain.value=0.45;
+  lfo.connect(d);d.connect(ig.gain);c.connect(ig);ig.connect(G.beatGain);c.start();lfo.start();
+  G.car=c;G.lfo=lfo;G.beatNodes=[c,ig,lfo,d];
+ }
+ scheduleFreqs();}
+function setRamp(p,a,b,t,dur){p.cancelScheduledValues(t);p.setValueAtTime(a,t);if(dur>0&&a!==b)p.linearRampToValueAtTime(b,t+dur);}
+function scheduleFreqs(){
+ if(!ctx)return;const t=ctx.currentTime;startT=t;
+ const s=state.fStart,e=state.ramp>0?state.fEnd:state.fStart,dur=state.ramp*60,c=state.carrier;
+ if(G.oscL){setRamp(G.oscL.frequency,c-s/2,c-e/2,t,dur);setRamp(G.oscR.frequency,c+s/2,c+e/2,t,dur);}
+ if(G.car){setRamp(G.car.frequency,c,c,t,0);setRamp(G.lfo.frequency,s,e,t,dur);}}
+function currentBeat(){if(!ctx)return state.fStart;if(!state.ramp)return state.fStart;
+ const k=Math.min(1,(ctx.currentTime-startT)/(state.ramp*60));return state.fStart+(state.fEnd-state.fStart)*k;}
+function buildLayers(){
+ const src=b=>{const s=ctx.createBufferSource();s.buffer=b;s.loop=true;s.start();return s;};
+ const brownBuf=makeLoop(20,2,genBrown),pinkBuf=makeLoop(16,2,genPink),rainBuf=makeLoop(24,2,genRain);
+ G.lg={};LAYERS.forEach(l=>{const g=ctx.createGain();g.gain.value=layerCurve(l.id,state.layers[l.id]||0);g.connect(G.fade);G.lg[l.id]=g;});
+ // Regen
+ const rlp=ctx.createBiquadFilter();rlp.type='lowpass';rlp.frequency.value=7500;src(rainBuf).connect(rlp);rlp.connect(G.lg.rain);
+ // Meer: tiefes Rauschen, dessen Filter und Lautstärke langsam wie Wellen an- und abschwellen
+ const of=ctx.createBiquadFilter();of.type='lowpass';of.frequency.value=700;of.Q.value=0.4;
+ const oa=ctx.createGain();oa.gain.value=0.55;
+ const lfo1=ctx.createOscillator();lfo1.frequency.value=1/9;
+ const lfo2=ctx.createOscillator();lfo2.frequency.value=1/14.3;
+ const l1f=ctx.createGain();l1f.gain.value=450;lfo1.connect(l1f);l1f.connect(of.frequency);
+ const l1a=ctx.createGain();l1a.gain.value=0.36;lfo1.connect(l1a);l1a.connect(oa.gain);
+ const l2a=ctx.createGain();l2a.gain.value=0.12;lfo2.connect(l2a);l2a.connect(oa.gain);
+ src(brownBuf).connect(of);of.connect(oa);oa.connect(G.lg.ocean);
+ const fhp=ctx.createBiquadFilter();fhp.type='highpass';fhp.frequency.value=1800;
+ const fa=ctx.createGain();fa.gain.value=0.12;const l1b=ctx.createGain();l1b.gain.value=0.11;lfo1.connect(l1b);l1b.connect(fa.gain);
+ src(pinkBuf).connect(fhp);fhp.connect(fa);fa.connect(G.lg.ocean);
+ lfo1.start();lfo2.start();
+ // Rauschen pur
+ src(brownBuf).connect(G.lg.brown);
+ src(pinkBuf).connect(G.lg.pink);}
+function build(){
+ ctx=new (window.AudioContext||window.webkitAudioContext)();
+ G={};
+ G.fade=ctx.createGain();G.fade.gain.value=0;
+ G.vol=ctx.createGain();G.vol.gain.value=volCurve(state.volume);
+ G.comp=ctx.createDynamicsCompressor();G.comp.threshold.value=-8;G.comp.ratio.value=4;
+ G.fade.connect(G.vol);G.vol.connect(G.comp);G.comp.connect(ctx.destination);
+ G.beatGain=ctx.createGain();G.beatGain.gain.value=beatCurve(state.beat);G.beatGain.connect(G.fade);
+ buildBeat();buildLayers();}
+function scheduleTimer(){
+ if(!ctx)return;const p=G.fade.gain,t=ctx.currentTime,cur=p.value;
+ p.cancelScheduledValues(t);p.setValueAtTime(cur,t);p.linearRampToValueAtTime(1,t+(cur<0.5?4:1));
+ timerEnd=state.timer?t+state.timer*60:null;
+ if(timerEnd){p.setValueAtTime(1,Math.max(t+4,timerEnd-60));p.linearRampToValueAtTime(0,timerEnd);}}
+function smooth(param,v){if(ctx)param.setTargetAtTime(v,ctx.currentTime,0.15);}
+
+/* ---------- Start / Stop ---------- */
+async function start(){
+ if(playing)return;
+ try{if('audioSession' in navigator)navigator.audioSession.type='playback';}catch(e){}
+ $('playBtn').textContent='…';
+ await new Promise(r=>setTimeout(r,20));
+ build();
+ try{await ctx.resume();}catch(e){}
+ playing=true;scheduleTimer();
+ $('playBtn').textContent='❚❚';$('playBtn').setAttribute('aria-label','Stopp');$('orb').classList.add('live');
+ tickId=setInterval(tick,500);tick();
+ setMediaSession();if(state.wake)requestWake();}
+function stop(){
+ if(!ctx)return;const c=ctx,f=G.fade.gain,t=c.currentTime;
+ f.cancelScheduledValues(t);f.setValueAtTime(f.value,t);f.linearRampToValueAtTime(0,t+1.2);
+ setTimeout(()=>{try{c.close();}catch(e){}},1400);
+ ctx=null;playing=false;timerEnd=null;clearInterval(tickId);
+ $('playBtn').textContent='▶';$('playBtn').setAttribute('aria-label','Start');$('orb').classList.remove('live');
+ $('timeInfo').textContent='';updateOrb(state.fStart);releaseWake();}
+function tick(){
+ if(!ctx)return;const now=ctx.currentTime;updateOrb(currentBeat());
+ const el=now-startT;let txt='Läuft '+mmss(el);
+ if(timerEnd){const left=timerEnd-now;if(left<=0){stop();return;}txt+=' · noch '+mmss(left);}
+ $('timeInfo').textContent=txt;}
+const mmss=s=>{s=Math.max(0,Math.floor(s));const m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');};
+function setMediaSession(){if(!('mediaSession' in navigator))return;try{
+ navigator.mediaSession.metadata=new MediaMetadata({title:preset().name,artist:'Binaural Beats'});
+ navigator.mediaSession.setActionHandler('play',start);navigator.mediaSession.setActionHandler('pause',stop);navigator.mediaSession.setActionHandler('stop',stop);}catch(e){}}
+async function requestWake(){try{if('wakeLock' in navigator&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;});}}catch(e){}}
+function releaseWake(){try{wakeLock&&wakeLock.release();}catch(e){}wakeLock=null;}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&playing&&state.wake)requestWake();});
+
+/* ---------- Events ---------- */
+$('playBtn').onclick=()=>playing?stop():start();
+$('modeSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;state.mode=b.dataset.mode;renderMode();save();if(ctx)buildBeat();};
+$('cats').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;state.cat=b.dataset.cat;renderCats();renderGrid();save();};
+$('grid').onclick=e=>{const b=e.target.closest('.preset');if(!b)return;applyPresetValues(PRESETS.find(p=>p.id===b.dataset.id));
+ renderGrid();renderLayers();renderTimers();renderSliders();renderHead();save();
+ if(ctx){smooth(G.beatGain.gain,beatCurve(state.beat));LAYERS.forEach(l=>smooth(G.lg[l.id].gain,layerCurve(l.id,state.layers[l.id]||0)));scheduleFreqs();scheduleTimer();setMediaSession();tick();}};
+$('layers').oninput=e=>{const id=e.target.dataset.layer;if(!id)return;const v=+e.target.value;state.layers[id]=v;$('lv_'+id).textContent=v+'%';save();if(ctx)smooth(G.lg[id].gain,layerCurve(id,v));};
+$('timers').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;state.timer=+b.dataset.t;renderTimers();save();if(ctx){scheduleTimer();tick();}};
+$('beat').oninput=e=>{state.beat=+e.target.value;$('beatV').textContent=state.beat+'%';save();if(ctx)smooth(G.beatGain.gain,beatCurve(state.beat));};
+$('volume').oninput=e=>{state.volume=+e.target.value;$('volumeV').textContent=state.volume+'%';save();if(ctx)smooth(G.vol.gain,volCurve(state.volume));};
+['fStart','fEnd','ramp','carrier'].forEach(id=>{$(id).oninput=e=>{state[id]=+e.target.value;renderSliders();save();if(ctx){scheduleFreqs();tick();}else updateOrb(state.fStart);};});
+$('wake').onchange=e=>{state.wake=e.target.checked;save();if(state.wake&&playing)requestWake();else releaseWake();};
+
+load();renderAll();
+</script>
+</body>
+</html>
